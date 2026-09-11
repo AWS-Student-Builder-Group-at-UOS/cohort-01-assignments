@@ -2,7 +2,7 @@
 
 **1인 · 1회차 · 1PR**로 제출합니다. 과제는 자율이며 수료 필수 조건이 아닙니다.
 
-📌 **[샘플 제출과 피드백 보기](https://github.com/AWS-Student-Builder-Group-at-UOS/cohort-01-assignments/pull/1)** · [과제 템플릿](assignment-template.md)
+📌 **[샘플 제출과 피드백 보기](https://github.com/AWS-Student-Builder-Group-at-UOS/cohort-01-assignments/issues/2)** · [과제 템플릿](assignment-template.md)
 
 ## 회차별 과제
 
