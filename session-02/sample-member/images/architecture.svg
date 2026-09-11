@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="470" viewBox="0 0 1040 470" role="img" aria-labelledby="title desc">
+  <title id="title">서비스 구성도: ALB에서 EC2 두 대를 거쳐 RDS로 연결</title>
+  <desc id="desc">ALB는 두 AZ의 퍼블릭 서브넷, EC2 두 대와 Single-AZ RDS는 프라이빗 서브넷에 배치합니다. 과제 제출 샘플의 구성도입니다.</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#60758d"/></marker></defs>
+  <rect width="1040" height="470" fill="#f4f7fb"/>
+  <g font-family="Malgun Gothic, Segoe UI, sans-serif" fill="#172a43">
+    <text x="32" y="37" font-size="16" font-weight="700" fill="#61718a">SESSION 02</text>
+    <rect x="924" y="17" width="84" height="28" rx="14" fill="#fef2c0"/>
+    <text x="966" y="37" text-anchor="middle" font-size="15" font-weight="600" fill="#735115">sample</text>
+    <text x="32" y="103" font-size="29" font-weight="700">요청 흐름과 접근 범위</text>
+    <text x="32" y="136" font-size="17" fill="#61718a">ALB → EC2 → RDS · 두 AZ에 애플리케이션 분산</text>
+    <rect x="205" y="160" width="210" height="232" rx="14" fill="#e8f3ff" stroke="#caddef"/>
+    <rect x="455" y="160" width="553" height="232" rx="14" fill="#e8f4ee" stroke="#cbe1d5"/>
+    <text x="225" y="194" font-size="17" font-weight="700" fill="#3c658c">퍼블릭 · 2개 AZ</text>
+    <text x="478" y="194" font-size="17" font-weight="700" fill="#427360">프라이빗</text>
+    <g fill="#ffffff" stroke="#cbd6e4">
+      <rect x="32" y="235" width="140" height="70" rx="12"/>
+      <rect x="225" y="235" width="170" height="70" rx="12"/>
+      <rect x="478" y="215" width="225" height="112" rx="12"/>
+      <rect x="782" y="225" width="200" height="92" rx="12"/>
+    </g>
+    <g font-size="22" font-weight="700" text-anchor="middle">
+      <text x="102" y="278">사용자</text>
+      <text x="310" y="278">ALB</text>
+      <text x="590" y="249">EC2 앱 2대</text>
+      <text x="882" y="261">RDS MySQL</text>
+    </g>
+    <g font-size="16" fill="#61718a" text-anchor="middle">
+      <text x="590" y="279">AZ A · AZ B</text>
+      <text x="590" y="309">ASG 최소·희망 2 / 최대 4</text>
+      <text x="882" y="291">Single-AZ</text>
+      <text x="310" y="352">외부 접점</text>
+      <text x="590" y="352">ALB 보안 그룹만 허용</text>
+      <text x="882" y="352">EC2 보안 그룹만 허용</text>
+    </g>
+    <g stroke="#60758d" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M172 270H222"/><path d="M395 270H475"/><path d="M703 270H779"/>
+    </g>
+    <g font-size="14" fill="#52657d" text-anchor="middle">
+      <text x="197" y="259">80</text><text x="436" y="259">8080</text><text x="742" y="259">3306</text>
+    </g>
+    <text x="32" y="438" font-size="16" fill="#61718a">외부 요청은 ALB로 받고, 애플리케이션과 데이터베이스는 프라이빗 서브넷에서 연결합니다.</text>
+  </g>
+</svg>
