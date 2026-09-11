@@ -20,7 +20,7 @@
 아래 `02`와 `my-id`를 본인 회차와 GitHub ID로 바꾸세요.
 
 1. **실습:** 회차 안내의 완료 조건·증빙·마감을 확인하고 과제를 수행합니다.
-2. **작성:** 템플릿 네 항목을 `session-02/my-id/README.md`에 작성합니다. 이미지는 같은 폴더의 `images/`에 넣고 `![확인 결과](images/result.png)`로 연결합니다.
+2. **작성:** 템플릿 네 항목을 `session-02/my-id/README.md`에 작성합니다. 구성도·설정·오류·결과 등 필요한 이미지는 같은 폴더의 `images/`에 넣고, 본문 원하는 위치에 `![구성도](images/architecture.svg)`처럼 연결합니다.
 3. **브랜치 준비:** 처음 한 번 **Fork**합니다. 매 회차 내 Fork의 `main`을 **Sync fork**로 갱신하고, `session-02/my-id` 브랜치를 새로 만듭니다.
 4. **업로드:** 새 브랜치의 저장소 첫 화면에서 **Add file → Upload files**로 준비한 `session-02` 폴더를 올리고 **Commit changes**를 누릅니다. 본인 폴더만 포함합니다.
 5. **PR 제출:** **Contribute → Open pull request**를 누릅니다. 대상은 **조직 저장소의 `main`**, 출발은 **내 Fork의 새 브랜치**입니다. 제목을 `[Session 02] 홍길동 과제 제출`로 쓰고 **Create pull request**를 누릅니다.
