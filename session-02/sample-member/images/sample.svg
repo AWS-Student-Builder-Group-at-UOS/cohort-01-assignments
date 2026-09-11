@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="22" viewBox="0 0 64 22" role="img" aria-label="sample">
+  <title>과제 제출 샘플</title>
+  <rect width="64" height="22" rx="11" fill="#fef2c0"/>
+  <text x="32" y="15" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="600" fill="#735115">sample</text>
+</svg>
