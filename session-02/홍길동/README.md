@@ -2,7 +2,7 @@
 
 [![sample](images/sample.svg)](https://github.com/AWS-Student-Builder-Group-at-UOS/cohort-01-assignments/issues/2)
 
-- 제출자: 홍길동 (`sample-member`)
+- 제출자: 홍길동
 - 과제명: ALB–EC2–RDS로 메모 저장·조회하기
 
 ## 1. What I Built
