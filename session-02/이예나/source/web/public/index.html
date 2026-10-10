@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수강신청</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>수강신청 <small>2027학년도 1학기</small></h1>
+    <div id="account" hidden>
+      <span id="who"></span>
+      <button type="button" id="logout" class="btn">로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <form id="login" class="login" hidden>
+    <h2>로그인</h2>
+    <label>학번<input name="id" autocomplete="username" required></label>
+    <label>비밀번호<input name="password" type="password" autocomplete="current-password" required></label>
+    <p id="login-msg" class="msg error" role="alert"></p>
+    <button type="submit" class="btn primary">로그인</button>
+    <p class="hint">실습용 계정 test01 ~ test30</p>
+  </form>
+
+  <section id="courses" hidden>
+    <div class="bar">
+      <h2>개설 강좌</h2>
+      <span id="summary"></span>
+      <button type="button" id="reload" class="btn">새로고침</button>
+    </div>
+    <p id="msg" class="msg" role="status"></p>
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th>과목코드</th>
+            <th>과목명</th>
+            <th>담당교수</th>
+            <th class="num">학점</th>
+            <th>강의시간</th>
+            <th class="num">신청/정원</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer id="served" class="wrap"></footer>
+<script src="/app.js"></script>
+</body>
+</html>

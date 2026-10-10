@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="330" viewBox="0 0 960 330" role="img" aria-labelledby="title desc">
+  <title id="title">APP 자동 교체와 로그인 세션 공유</title>
+  <desc id="desc">APP 프로세스 중지 후 Unhealthy를 확인했고, 17시 26분 14초에 ASG 교체가 시작됐다. 17시 28분에 Healthy 2대, 17시 31분에 기존 정상 APP과 새 APP에서 test01 로그인이 유지되는 것을 확인했다. 프로세스 중단의 정확한 시각은 확인하지 못했다. 브라우저의 같은 sid 쿠키, APP들의 동일한 세션 서명 키, 공유 Valkey 세션 저장소가 로그인 유지에 사용됐다. 아래 연결은 APP과 세션 저장소를 중심으로 표현했으며 ALB와 WEB 경로는 생략했다. 전환 중과 이후 일부 요청에서 502가 발생했다. 단계 간 간격은 시간에 비례하지 않는다.</desc>
+  <defs>
+    <marker id="arrow" markerUnits="userSpaceOnUse" viewBox="0 0 12 12" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M4 2L10 6L4 10" fill="none" stroke="#202020" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect width="960" height="330" fill="#fff"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, Noto Sans KR, Segoe UI, sans-serif" fill="#202020">
+    <g stroke="#ddd" stroke-width="1.5" fill="#f7f7f7">
+      <rect x="28" y="28" width="144" height="58" rx="8"/>
+      <rect x="218" y="28" width="144" height="58" rx="8"/>
+      <rect x="408" y="28" width="144" height="58" rx="8"/>
+      <rect x="598" y="28" width="144" height="58" rx="8"/>
+      <rect x="788" y="28" width="144" height="58" rx="8"/>
+    </g>
+    <g stroke="#202020" stroke-width="1.7" fill="none" marker-end="url(#arrow)">
+      <path d="M176 57H214"/>
+      <path d="M366 57H404"/>
+      <path d="M556 57H594"/>
+      <path d="M746 57H784"/>
+    </g>
+    <g text-anchor="middle" font-size="17" font-weight="600">
+      <text x="100" y="64">APP 중지</text>
+      <text x="290" y="64">Unhealthy</text>
+      <text x="480" y="64">ASG 교체</text>
+      <text x="670" y="64">Healthy</text>
+      <text x="860" y="64">로그인 유지</text>
+    </g>
+
+    <path d="M28 114H932" stroke="#ddd"/>
+    <text x="28" y="143" font-size="16" font-weight="600">APP ↔ 세션 저장소</text>
+    <text x="194" y="143" font-size="14" fill="#666">(ALB/WEB 생략)</text>
+
+    <g stroke="#ddd" stroke-width="1.5" fill="#f7f7f7">
+      <rect x="28" y="218" width="166" height="64" rx="8"/>
+      <rect x="280" y="194" width="210" height="42" rx="8"/>
+      <rect x="280" y="262" width="210" height="42" rx="8"/>
+      <rect x="614" y="210" width="318" height="78" rx="8"/>
+    </g>
+    <g stroke="#202020" stroke-width="1.7" fill="none" marker-end="url(#arrow)">
+      <path d="M194 250H235V215H276"/>
+      <path d="M235 250V283H276"/>
+    </g>
+    <g stroke="#202020" stroke-width="1.7" fill="none">
+      <path d="M490 215H550V249H610" marker-end="url(#arrow)"/>
+      <path d="M490 283H550V249"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="111" y="244" font-size="17" font-weight="600">브라우저</text>
+      <text x="111" y="267" font-size="15" fill="#666">같은 sid 쿠키</text>
+      <text x="385" y="179" font-size="15" fill="#666">동일한 서명 키</text>
+      <text x="385" y="222" font-size="17" font-weight="600">기존 정상 APP</text>
+      <text x="385" y="290" font-size="17" font-weight="600">새 APP</text>
+      <text x="773" y="242" font-size="17" font-weight="600">Valkey 세션 저장소</text>
+      <text x="773" y="268" font-size="16" fill="#666">sid → test01</text>
+    </g>
+  </g>
+</svg>

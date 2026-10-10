@@ -1,0 +1,219 @@
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #222;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+.wrap {
+  max-width: 980px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+header {
+  border-bottom: 1px solid #d9d9d9;
+  background: #f7f7f7;
+}
+
+header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 17px;
+}
+
+h1 small {
+  margin-left: 8px;
+  color: #777;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+#account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+main {
+  padding-top: 28px;
+  padding-bottom: 40px;
+}
+
+.login {
+  width: 320px;
+  margin: 32px auto;
+  padding: 24px;
+  border: 1px solid #d9d9d9;
+}
+
+.login h2 {
+  margin-bottom: 16px;
+}
+
+.login label {
+  display: block;
+  margin-bottom: 12px;
+  color: #555;
+  font-size: 13px;
+}
+
+.login input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 8px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  font: inherit;
+}
+
+.login .btn {
+  width: 100%;
+  padding: 8px;
+}
+
+.login .msg:empty {
+  display: none;
+}
+
+.hint {
+  margin: 12px 0 0;
+  color: #888;
+  font-size: 12px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+#summary {
+  margin-left: auto;
+  color: #555;
+  font-size: 13px;
+}
+
+.msg {
+  min-height: 20px;
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.msg.error {
+  color: #b3261e;
+}
+
+.table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 2px solid #333;
+  font-size: 13.5px;
+}
+
+th,
+td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #e3e3e3;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f4f4f4;
+  color: #444;
+  font-weight: 600;
+}
+
+.num {
+  text-align: right;
+}
+
+td:last-child {
+  width: 1%;
+  text-align: right;
+}
+
+tr.mine td {
+  background: #f2f6fb;
+}
+
+.btn {
+  padding: 4px 12px;
+  border: 1px solid #aaa;
+  border-radius: 2px;
+  background: #fff;
+  color: #222;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #f2f2f2;
+}
+
+.btn.primary {
+  border-color: #27496d;
+  background: #27496d;
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: #1f3b58;
+}
+
+.btn.accent {
+  border-color: #27496d;
+  color: #27496d;
+}
+
+.btn.accent:hover {
+  background: #eef3f8;
+}
+
+.btn:disabled {
+  border-color: #ddd;
+  background: #f5f5f5;
+  color: #aaa;
+  cursor: default;
+}
+
+footer {
+  padding-top: 14px;
+  padding-bottom: 28px;
+  border-top: 1px solid #eee;
+  color: #888;
+  font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::i2na-asbg-artifacts/app.tar.gz"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": [
+        "<DB 비밀 ARN>",
+        "<세션 키 비밀 ARN>"
+      ]
+    }
+  ]
+}
