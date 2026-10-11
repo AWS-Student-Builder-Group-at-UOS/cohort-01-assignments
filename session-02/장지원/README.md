@@ -17,9 +17,23 @@
 
 ### 1. 세션은 Redis에 저장 → 서버가 바뀌어도 같은 세션
 
-- APP 메모리 대신 Redis에 세션 저장 → APP 교체·추가·제거 후에도 같은 세션을 읽음
-- Sticky session은 서버 교체와 부하 집중 문제로 제외
-- DB 세션 저장은 수강신청 시점의 DB 부하 때문에 제외
+- APP 메모리 대신 Redis에 세션 저장 → APP 교체·추가·제거 후에도 같은 세션을 읽도록 설계
+- Sticky Session은 서버 교체와 부하 집중 문제로 제외
+- DB 세션 저장은 수강신청 시점의 DB 부하를 고려해 제외
+
+#### Redis 자체의 장애 대응
+
+APP 서버끼리 세션을 공유하더라도 정작 Redis가 중단되면 모든 서버에서 로그인 정보를 확인할 수 없다는 문제
+
+초기에는 단일 노드로 구성했으나 Redis도 장애에 대비해야 한다고 판단해 다른 AZ에 Replica를 추가하고 Multi-AZ 자동 장애 조치 활성화
+
+- **Primary** — 로그인 정보를 저장하고 변경하는 주 노드
+- **Replica** — Primary의 데이터를 복제해 두는 예비 노드
+- **자동 장애 조치** — Primary 장애 시 Replica가 역할을 이어받도록 설정
+
+변경 후 설정 화면은 캡처하지 못해 초기 단일 노드 구성 화면만 첨부
+
+실제 Failover 테스트는 진행하지 않았으며 Redis의 비동기 복제로 인해 장애 직전 일부 데이터가 유실될 가능성 존재
 
 ### 2. 장애 서버는 ALB가 빼고 ASG가 교체
 
@@ -35,9 +49,22 @@
 ### 4. 보안과 DB
 
 - 보안 그룹은 바로 앞 계층만 소스로 허용, 인터넷 진입점은 Public ALB 하나
-  `do-public-alb` → `do-web` → `do-internal-alb` → `do-app` → `do-redis` / `do-rds-proxy` → `do-rds`
+  - 요청 경로: `do-public-alb` → `do-web` → `do-internal-alb` → `do-app`
+  - 세션 관리: `do-app` → `do-redis`
+  - DB 연결: `do-app` → `do-rds-proxy` → `do-rds`
 - 서버 접속은 SSM Session Manager (키 페어 X)
 - DB(설계): RDS Proxy로 연결 재사용, 정원 초과는 `SELECT ... FOR UPDATE`, 중복 신청은 `UNIQUE(student_id, course_id)`로 방지
+
+#### Redis 접근 경로와 실습 환경의 차이
+
+실습에서는 두 WEB EC2가 같은 Redis 데이터를 조회하는지 확인하기 위해 Redis CLI로 직접 접속
+
+반면 최종 설계에서는 APP 서버만 Redis에 접근하도록 제한하고 WEB 서버는 APP으로 요청을 전달하는 역할만 담당
+
+- **실습** — `WEB → Redis` 직접 연결로 데이터 공유 확인
+- **최종 설계** — `APP → Redis` 연결만 허용하도록 Redis의 TCP 6379 인바운드 규칙 제한
+
+따라서 최종 보안 정책을 적용하면 실습에서 사용했던 WEB 서버의 Redis 직접 접근은 차단되는 구조
 
 ---
 
@@ -58,6 +85,16 @@
 
 **원인** — ASG에 public 서브넷을 지정. 공인 IP가 없어 IGW로 나갈 수 없고 NAT 경로도 타지 않아 외부 통신이 불가
 
+#### 네트워크 관점에서의 원인 분석
+
+처음에는 NAT Gateway와 라우팅 테이블이 정상이라 네트워크 문제가 아닐 거라고 생각했으나 실제로는 EC2가 잘못된 서브넷에 생성된 것이 원인
+
+Public Subnet에 생성된 EC2는 공인 IP가 없어 IGW로 직접 나갈 수 없었고 Private Subnet에 설정한 NAT Gateway 경로도 사용하지 못한 상태
+
+**정상적인 외부 통신 경로**
+
+`WEB EC2 → Private Route Table → NAT Gateway → Internet Gateway → 외부 패키지 저장소`
+
 **해결** — ASG 서브넷을 `web-subnet-a·c`로 수정하고 기존 인스턴스 종료 (User Data 재실행을 위해 새로 생성)
 
 ![web-subnet-c에 새로 생성된 인스턴스](images/03_troubleshooting/03-6_instance-in-web-subnet.png)
@@ -68,11 +105,28 @@
 
 ![ASG 상태 확인 EC2 + ELB](images/04_failover/04-1_asg-health-check-type.png)
 
+
+#### 추가 학습: ALB Health Check Reason Code
+
+이번에는 `Health checks failed`를 확인한 뒤 EC2 로그와 네트워크 설정을 하나씩 살펴보며 원인 추적
+
+리뷰를 통해 ALB가 Health Check 실패 이유를 구분하는 `Reason Code`를 제공한다는 점을 알게 됨
+
+```bash
+aws elbv2 describe-target-health \
+  --target-group-arn <TARGET_GROUP_ARN>
+```
+
+- `Target.ResponseCodeMismatch` — 예상한 HTTP 응답 코드와 실제 응답이 다를 때
+- `Target.Timeout` — 서버가 정해진 시간 안에 응답하지 않을 때
+
+이번에는 직접 사용하지 못했지만 다음에 비슷한 문제가 발생한다면 Reason Code부터 확인해 볼 계획
+
 ---
 
 ## 검증
 
-충족: 다중 AZ 배치·계층별 접근 제어, 요청 분산, 장애 감지·제외, 장애 인스턴스 자동 교체, 세션 저장소 공유, 서버 수 조정, 동적 확장, 예약 확장, 로그인 유지
+충족: 다중 AZ WEB 서버 배치·ALB 요청 분산·장애 인스턴스 자동 교체·Redis 데이터 공유
 
 ### 요청 분산
 
@@ -94,16 +148,21 @@ ALB 주소로 반복 접속 → 2a(10.0.11.100)와 2c(10.0.12.23)의 호스트�
 
 ![인스턴스 B](images/05_session-redis/05-4_redis-instance-b.png)
 
-> 두 서버의 Redis 공유까지만 확인. **앱 로그인 세션 연동은 미검증**
+
+#### 검증 범위
+
+- **검증 완료** — 서로 다른 WEB EC2에서 동일한 Redis 데이터 조회
+- **구성 완료** — Redis Replica 추가 및 Multi-AZ 자동 장애 조치 활성화
+- **미검증** — Primary 장애 발생 시 Replica 승격 및 실제 Failover 과정
+- **미검증** — APP 로그인 세션 연동 및 장애 발생 중 로그인 유지
 
 ---
 
 ## 한계 및 향후 개선
 
-- **가용성 강화:** NAT Gateway를 AZ별로 구성해 특정 가용 영역의 장애가 전체 서비스에 미치는 영향 최소화
-- **장애 대응 검증:** nginx 중지 등 간단한 장애 상황을 재현해 ALB의 Health Check 및 트래픽 전환 확인
-- **Auto Scaling 검증:** CPU 부하에 따라 서버가 자동으로 확장·축소되는 과정 확인
-- **DB 병목 개선:** 동시 접속 증가 시 APP 서버 확장만으로 해결하기 어려운 DB 병목과 데이터 정합성 문제 추가 학습
+- **고가용성 검증** — Redis Multi-AZ 자동 장애 조치와 WEB 서버 장애 상황에서의 실제 서비스 복구 과정 확인
+- **트래픽 대응 검증** — CPU 부하에 따른 Auto Scaling 동작과 요청 분산 효과 확인
+- **DB 병목 및 정합성** — APP 서버 확장에 따른 DB 연결 증가와 동시 수강신청 시 데이터 정확성 검증
 
 이번에는 인프라 구성 자체에 집중했다면 향후에는 **구축한 아키텍처가 실제 장애와 트래픽 증가 상황에서 어떻게 동작하는지 검증하는 것**을 다음 학습 목표로!
 
@@ -148,8 +207,8 @@ ALB 주소로 반복 접속 → 2a(10.0.11.100)와 2c(10.0.12.23)의 호스트�
 
 ![Redis 서브넷 그룹](images/05_session-redis/05-1_redis-subnet-group.png)
 
-**05-2** Redis 구성
+**05-2** Redis 초기 단일 노드 구성
 
-![Redis 구성](images/05_session-redis/05-2_redis-config.png)
+![Redis 초기 구성](images/05_session-redis/05-2_redis-config.png)
 
 </details>
