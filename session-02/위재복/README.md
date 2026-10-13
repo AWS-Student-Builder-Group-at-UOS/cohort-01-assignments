@@ -125,8 +125,38 @@ DB·서버 디스크·Redis 저장 데이터는 암호화합니다. DB 비밀번
 
 ## 4. Screenshots
 
-이번 과제는 **설계만 제출**하므로 실제 AWS 실행 결과 화면은 포함하지 않습니다. 아키텍처 다이어그램은 2번에 첨부했고, 로그인 유지·장애 대응·자동 확장의 확인 방법과 목표는 3번 검증 계획에 작성했습니다.
+이번 제출은 설계와 검증 계획입니다.
+선택 구현은 진행하지 않았으므로 실제 실행 결과 화면은 없습니다.
 
-구현과 실행 검증은 선택 구현 범위로 남겨두었습니다. 현재 문서의 설정값과 성공 기준은 설계 가정이며, 테스트에 성공했다고 주장하지 않습니다.
+### 로그인 유지
 
-참고: [과제 예시](https://github.com/AWS-Student-Builder-Group-at-UOS/cohort-01-assignments/blob/sample/session-02/session-02/홍길동/README.md), [ASG 상태 검사](https://docs.aws.amazon.com/autoscaling/ec2/userguide/health-checks-overview.html), [ALB 상태 검사](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html), [예약 확장](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scheduled-scaling.html), [Target Tracking](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html), [RDS Multi-AZ](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html), [Redis 장애 전환](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html)
+**완료 조건: APP이 교체되거나 요청이 다른 APP으로 전달되어도 로그인 유지**
+
+- 확인 방법: 동일한 로그인 쿠키로 여러 APP에 요청하고,
+  APP 교체·확장·축소 전후에 동일한 사용자로 확인되는지 검증할 계획입니다.
+- 확인 결과: 실제 실행은 하지 않았습니다.
+  공용 Redis 세션을 사용하는 설계와 검증 계획을 작성했습니다.
+
+### 장애 대응
+
+**완료 조건: 장애 APP 제외 및 정상 서버로 서비스 지속, 자동 교체**
+
+- 확인 방법: APP 한 대의 프로그램을 중단하고,
+  ALB의 장애 대상 제외와 Auto Scaling의 새 서버 생성 기록을 확인할 계획입니다.
+- 확인 결과: 실제 실행은 하지 않았습니다.
+  ALB 상태 검사와 Auto Scaling의 ELB health checks를 적용하도록 설계했습니다.
+
+### 자동 확장·축소
+
+**완료 조건: 시작 전에 서버를 확보하고 요청량에 따라 서버 수 조절**
+
+- 확인 방법: 예약 시각 전에 서버가 준비되는지 확인하고,
+  부하를 증가·감소시키며 서버 수와 응답 시간의 변화를 측정할 계획입니다.
+- 확인 결과: 실제 실행은 하지 않았습니다.
+  예약 확장과 요청량 기반 Target Tracking을 사용하는 설계를 작성했습니다.
+
+### 아키텍처 다이어그램 — PNG 버전
+
+아래 그림은 설계도이며 실제 실행 결과 화면은 아닙니다.
+
+![수강신청 포털 아키텍처 PNG](images/architecture.png)
