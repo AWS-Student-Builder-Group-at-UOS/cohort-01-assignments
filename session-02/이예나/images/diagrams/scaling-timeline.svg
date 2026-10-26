@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="330" viewBox="0 0 960 330" role="img" aria-labelledby="scaling-title scaling-desc">
+  <title id="scaling-title">APP과 WEB의 원하는 용량 변화</title>
+  <desc id="scaling-desc">시간에 비례하지 않는 사건 순서도다. APP의 원하는 용량은 기본 2대에서 예약 확장으로 4대, 부하 증가로 6대, 부하 감소 후 5대, 4대, 3대, 2대로 줄었다. 중간 18시 5분 예약 작업은 최소 용량만 4대에서 2대로 낮추고 원하는 용량 6대를 유지했다. WEB의 원하는 용량은 기본 2대에서 부하 증가로 4대, 부하 감소 후 3대, 2대로 줄었다. 각 숫자는 Healthy 대상 수가 아닌 ASG 원하는 용량이다.</desc>
+  <defs>
+    <marker id="scaling-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 12 12" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M4 2L10 6L4 10" fill="none" stroke="#202020" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="960" height="330" fill="#fff"/>
+  <g font-family="Apple SD Gothic Neo, sans-serif" fill="#202020">
+    <text x="24" y="30" font-size="20" font-weight="700">원하는 용량</text>
+    <text x="936" y="29" font-size="14" text-anchor="end" fill="#666">사건 순서 / 시간 비례 아님</text>
+
+    <g font-size="15" fill="#666" text-anchor="middle">
+      <text x="170" y="68">기본</text>
+      <text x="395" y="68">예약 확장</text>
+      <text x="620" y="68">부하 확장</text>
+      <text x="845" y="68">부하 감소</text>
+    </g>
+
+    <text x="24" y="121" font-size="20" font-weight="700">APP</text>
+    <g fill="#f7f7f7" stroke="#ddd">
+      <rect x="120" y="88" width="100" height="50" rx="6"/>
+      <rect x="345" y="88" width="100" height="50" rx="6"/>
+      <rect x="570" y="88" width="100" height="50" rx="6"/>
+      <rect x="795" y="88" width="100" height="50" rx="6"/>
+    </g>
+    <g fill="none" stroke="#202020" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#scaling-arrow)">
+      <path d="M232 113H332"/>
+      <path d="M457 113H557"/>
+      <path d="M682 113H782"/>
+    </g>
+    <g font-size="24" font-weight="700" text-anchor="middle">
+      <text x="170" y="122">2대</text>
+      <text x="395" y="122">4대</text>
+      <text x="620" y="122">6대</text>
+      <text x="845" y="122">2대</text>
+    </g>
+    <text x="845" y="163" font-size="14" text-anchor="middle" fill="#666">6 → 5 → 4 → 3 → 2</text>
+    <path d="M620 140V169" fill="none" stroke="#666" stroke-dasharray="3 4"/>
+    <text x="620" y="189" font-size="14" text-anchor="middle" fill="#666">18:05 예약: 최소 4 → 2 / 원하는 용량 6 유지</text>
+
+    <path d="M24 208H936" stroke="#ddd"/>
+    <text x="24" y="271" font-size="20" font-weight="700">WEB</text>
+    <g fill="#f7f7f7" stroke="#ddd">
+      <rect x="120" y="238" width="100" height="50" rx="6"/>
+      <rect x="570" y="238" width="100" height="50" rx="6"/>
+      <rect x="795" y="238" width="100" height="50" rx="6"/>
+    </g>
+    <g fill="none" stroke="#202020" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#scaling-arrow)">
+      <path d="M232 263H557"/>
+      <path d="M682 263H782"/>
+    </g>
+    <g font-size="24" font-weight="700" text-anchor="middle">
+      <text x="170" y="272">2대</text>
+      <text x="620" y="272">4대</text>
+      <text x="845" y="272">2대</text>
+    </g>
+    <text x="845" y="313" font-size="14" text-anchor="middle" fill="#666">4 → 3 → 2</text>
+  </g>
+</svg>
