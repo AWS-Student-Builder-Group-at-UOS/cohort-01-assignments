@@ -1,0 +1,289 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1395" width="1100" height="1395" role="img" aria-label="수강신청 포털 3-Tier 아키텍처">
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#37475A"/>
+    </marker>
+    <marker id="arwG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#A7B0BA"/>
+    </marker>
+
+    <!-- ===== 그룹 아이콘 (AWS 그룹 표기) ===== -->
+    <symbol id="g-cloud" viewBox="0 0 20 20">
+      <g fill="#242F3E">
+        <circle cx="7" cy="11.2" r="3.5"/>
+        <circle cx="12.6" cy="9.6" r="4.3"/>
+        <rect x="6" y="11.2" width="8.6" height="3.5" rx="1.75"/>
+      </g>
+    </symbol>
+    <symbol id="g-region" viewBox="0 0 20 20">
+      <rect x="2.2" y="2.2" width="15.6" height="15.6" rx="2" fill="none" stroke="#00A4A6" stroke-width="1.8" stroke-dasharray="3 2"/>
+    </symbol>
+    <symbol id="g-vpc" viewBox="0 0 20 20">
+      <rect width="20" height="20" rx="3" fill="#8C4FFF"/>
+      <rect x="5" y="5" width="10" height="10" rx="1.4" fill="none" stroke="#fff" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="g-subnet" viewBox="0 0 20 20">
+      <rect width="20" height="20" rx="3" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.4">
+        <path d="M4 8h12M4 12h12M8 4v12M12 4v12"/>
+      </g>
+    </symbol>
+    <symbol id="g-asg" viewBox="0 0 20 20">
+      <rect width="20" height="20" rx="3" fill="#ED7100"/>
+      <g fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round">
+        <path d="M15 8.2A5.5 5.5 0 1 0 15.6 12.4"/>
+        <path d="M15.2 4.4v3.9h-3.9"/>
+      </g>
+    </symbol>
+
+    <!-- ===== 서비스 아이콘 ===== -->
+    <symbol id="i-users" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <circle cx="16" cy="12.5" r="4.3" fill="#fff"/>
+      <path d="M7 25.5c0-5 4-8.2 9-8.2s9 3.2 9 8.2z" fill="#fff"/>
+    </symbol>
+    <symbol id="i-igw" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.7">
+        <circle cx="16" cy="16" r="8.5"/>
+        <path d="M7.5 16h17M16 7.5c3.2 3.4 3.2 13.6 0 17M16 7.5c-3.2 3.4-3.2 13.6 0 17"/>
+      </g>
+    </symbol>
+    <symbol id="i-nat" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 20.5h15M23 20.5l-5-5M23 20.5l-5 5"/>
+        <path d="M24 11.5H9M9 11.5l5-5M9 11.5l5 5"/>
+      </g>
+    </symbol>
+    <symbol id="i-vpce" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="16" cy="16" r="3.2"/>
+        <path d="M16 12.8V7M16 19.2V25M12.8 16H7M19.2 16H25"/>
+        <circle cx="16" cy="6" r="1.6"/><circle cx="16" cy="26" r="1.6"/>
+        <circle cx="6" cy="16" r="1.6"/><circle cx="26" cy="16" r="1.6"/>
+      </g>
+    </symbol>
+    <symbol id="i-alb" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round">
+        <path d="M5 16h7M12 16l7-8M12 16h7M12 16l7 8"/>
+      </g>
+      <g fill="#fff">
+        <circle cx="21.5" cy="8" r="2.4"/>
+        <circle cx="21.5" cy="16" r="2.4"/>
+        <circle cx="21.5" cy="24" r="2.4"/>
+      </g>
+    </symbol>
+    <symbol id="i-ec2" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round">
+        <rect x="9.5" y="9.5" width="13" height="13" rx="1.2"/>
+        <path d="M13 6v3.5M16 6v3.5M19 6v3.5M13 22.5V26M16 22.5V26M19 22.5V26M6 13h3.5M6 16h3.5M6 19h3.5M22.5 13H26M22.5 16H26M22.5 19H26"/>
+      </g>
+    </symbol>
+    <symbol id="i-rds" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.7">
+        <ellipse cx="16" cy="10" rx="8" ry="3.3"/>
+        <path d="M8 10v12c0 1.85 3.6 3.3 8 3.3s8-1.45 8-3.3V10"/>
+        <path d="M8 16c0 1.85 3.6 3.3 8 3.3s8-1.45 8-3.3"/>
+      </g>
+    </symbol>
+    <symbol id="i-cache" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="5" fill="currentColor"/>
+      <g fill="none" stroke="#fff" stroke-width="1.6">
+        <rect x="6.5" y="7" width="19" height="7" rx="1.6"/>
+        <rect x="6.5" y="17" width="19" height="7" rx="1.6"/>
+      </g>
+      <circle cx="11" cy="10.5" r="1.4" fill="#fff"/>
+      <circle cx="11" cy="20.5" r="1.4" fill="#fff"/>
+    </symbol>
+
+    <style>
+      .t    { font-family: 'Amazon Ember','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR','Helvetica Neue',sans-serif; }
+      .h1   { font-size: 22px; font-weight: 700; fill: #16212E; }
+      .h2   { font-size: 13px; fill: #5B6671; }
+      .grp  { font-size: 12.5px; font-weight: 700; }
+      .az   { font-size: 12px; font-weight: 700; fill: #5B6671; }
+      .asg  { font-size: 11.5px; font-weight: 700; fill: #B35A00; }
+      .svc  { font-size: 12px; font-weight: 700; fill: #16212E; }
+      .cap  { font-size: 10.5px; fill: #5B6671; }
+      .gsvc { font-size: 12px; font-weight: 700; fill: #99A2AD; }
+      .gcap { font-size: 10.5px; fill: #A7B0BA; }
+      .leg  { font-size: 10.5px; fill: #5B6671; }
+      .legb { font-size: 11px; font-weight: 700; fill: #46525E; }
+      .f    { stroke: #37475A; stroke-width: 1.8; fill: none; }
+      /* 라벨이 화살표 위로 읽히도록 배경색 외곽선을 둘러 끊어냄 */
+      .hp   { paint-order: stroke; stroke: #F2F6E8; stroke-width: 3.5px; stroke-linejoin: round; }
+      .hv   { paint-order: stroke; stroke: #E8F5F5; stroke-width: 3.5px; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1100" height="1395" fill="#FFFFFF"/>
+
+  <text class="t h1" x="550" y="34" text-anchor="middle">수강신청 포털 3-Tier 아키텍처</text>
+  <text class="t h2" x="550" y="56" text-anchor="middle">외부 ALB → WEB → 내부 ALB → APP → RDS · 세션은 ElastiCache로 APP 외부에 분리</text>
+
+  <!-- 사용자 -->
+  <use href="#i-users" x="530" y="74" width="40" height="40" style="color:#232F3E"/>
+  <text class="t svc" x="550" y="128" text-anchor="middle">학생 (브라우저)</text>
+
+  <!-- ===== AWS 클라우드 ===== -->
+  <rect x="20" y="152" width="1060" height="1060" rx="8" fill="none" stroke="#242F3E" stroke-width="2"/>
+  <use href="#g-cloud" x="34" y="162" width="20" height="20"/>
+  <text class="t grp" x="60" y="177" fill="#242F3E">AWS 클라우드</text>
+
+  <!-- ===== 리전 ===== -->
+  <rect x="36" y="186" width="1028" height="1008" rx="8" fill="none" stroke="#00A4A6" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <use href="#g-region" x="50" y="196" width="20" height="20"/>
+  <text class="t grp" x="76" y="211" fill="#007F86">리전 · ap-northeast-2 (서울)</text>
+
+  <!-- ===== VPC ===== -->
+  <rect x="52" y="220" width="996" height="954" rx="8" fill="none" stroke="#8C4FFF" stroke-width="2"/>
+  <use href="#g-vpc" x="64" y="230" width="20" height="20"/>
+  <text class="t grp" x="90" y="245" fill="#6B2FD6">VPC · 10.0.0.0/16</text>
+
+  <!-- Internet gateway -->
+  <use href="#i-igw" x="530" y="258" width="40" height="40" style="color:#8C4FFF"/>
+  <text class="t svc" x="550" y="312" text-anchor="middle">Internet gateway</text>
+
+  <!-- ===== 가용 영역 ===== -->
+  <rect x="62" y="336" width="484" height="812" rx="6" fill="none" stroke="#7D8998" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text class="t az" x="76" y="356">가용 영역 · ap-northeast-2a</text>
+  <rect x="554" y="336" width="484" height="812" rx="6" fill="none" stroke="#7D8998" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text class="t az" x="568" y="356">가용 영역 · ap-northeast-2b</text>
+
+  <!-- 퍼블릭 서브넷 -->
+  <rect x="70" y="368" width="468" height="118" rx="5" fill="#F2F6E8" stroke="#7AA116" stroke-width="1.5"/>
+  <use href="#g-subnet" x="80" y="376" width="16" height="16" style="color:#7AA116"/>
+  <text class="t grp" x="102" y="389" fill="#55790F">퍼블릭 서브넷</text>
+  <rect x="562" y="368" width="468" height="118" rx="5" fill="#F2F6E8" stroke="#7AA116" stroke-width="1.5"/>
+  <use href="#g-subnet" x="572" y="376" width="16" height="16" style="color:#7AA116"/>
+  <text class="t grp" x="594" y="389" fill="#55790F">퍼블릭 서브넷</text>
+
+  <!-- 프라이빗 서브넷 WEB -->
+  <rect x="70" y="502" width="468" height="140" rx="5" fill="#E8F5F5" stroke="#00A4A6" stroke-width="1.5"/>
+  <use href="#g-subnet" x="80" y="510" width="16" height="16" style="color:#00A4A6"/>
+  <text class="t grp" x="102" y="523" fill="#007F86">프라이빗 서브넷 · WEB</text>
+  <rect x="562" y="502" width="468" height="140" rx="5" fill="#E8F5F5" stroke="#00A4A6" stroke-width="1.5"/>
+  <use href="#g-subnet" x="572" y="510" width="16" height="16" style="color:#00A4A6"/>
+  <text class="t grp" x="594" y="523" fill="#007F86">프라이빗 서브넷 · WEB</text>
+
+  <!-- 프라이빗 서브넷 APP -->
+  <rect x="70" y="658" width="468" height="322" rx="5" fill="#E8F5F5" stroke="#00A4A6" stroke-width="1.5"/>
+  <use href="#g-subnet" x="80" y="666" width="16" height="16" style="color:#00A4A6"/>
+  <text class="t grp" x="102" y="679" fill="#007F86">프라이빗 서브넷 · APP</text>
+  <rect x="562" y="658" width="468" height="322" rx="5" fill="#E8F5F5" stroke="#00A4A6" stroke-width="1.5"/>
+  <use href="#g-subnet" x="572" y="666" width="16" height="16" style="color:#00A4A6"/>
+  <text class="t grp" x="594" y="679" fill="#007F86">프라이빗 서브넷 · APP</text>
+
+  <!-- 프라이빗 서브넷 DB -->
+  <rect x="70" y="996" width="468" height="132" rx="5" fill="#E8F5F5" stroke="#00A4A6" stroke-width="1.5"/>
+  <use href="#g-subnet" x="80" y="1004" width="16" height="16" style="color:#00A4A6"/>
+  <text class="t grp" x="102" y="1017" fill="#007F86">프라이빗 서브넷 · DB</text>
+  <rect x="562" y="996" width="468" height="132" rx="5" fill="#E8F5F5" stroke="#00A4A6" stroke-width="1.5"/>
+  <use href="#g-subnet" x="572" y="1004" width="16" height="16" style="color:#00A4A6"/>
+  <text class="t grp" x="594" y="1017" fill="#007F86">프라이빗 서브넷 · DB</text>
+
+  <!-- ===== Auto Scaling 그룹 (2개 AZ에 걸침) ===== -->
+  <rect x="100" y="532" width="898" height="98" rx="6" fill="none" stroke="#ED7100" stroke-width="1.8" stroke-dasharray="7 4"/>
+  <use href="#g-asg" x="110" y="538" width="16" height="16"/>
+  <text class="t asg" x="132" y="551">Auto Scaling 그룹 · WEB</text>
+
+  <rect x="100" y="772" width="898" height="98" rx="6" fill="none" stroke="#ED7100" stroke-width="1.8" stroke-dasharray="7 4"/>
+  <use href="#g-asg" x="110" y="778" width="16" height="16"/>
+  <text class="t asg" x="132" y="791">Auto Scaling 그룹 · APP</text>
+
+  <!-- ===== 요청 흐름 · 직각 연결선 (아이콘보다 아래 레이어) ===== -->
+  <path class="f" d="M550 136 V252" marker-end="url(#arw)"/>
+  <path class="f" d="M550 318 V394" marker-end="url(#arw)"/>
+
+  <path class="f" d="M530 420 H300 V552" marker-end="url(#arw)"/>
+  <path class="f" d="M570 420 H800 V552" marker-end="url(#arw)"/>
+
+  <path class="f" d="M300 638 V650 H540 V682" marker-end="url(#arw)"/>
+  <path class="f" d="M800 638 V650 H560 V682" marker-end="url(#arw)"/>
+
+  <path class="f" d="M530 708 H300 V792" marker-end="url(#arw)"/>
+  <path class="f" d="M570 708 H800 V792" marker-end="url(#arw)"/>
+
+  <path class="f" d="M340 878 V1046 H524" marker-end="url(#arw)"/>
+  <path class="f" d="M760 878 V1046 H576" marker-end="url(#arw)"/>
+
+  <path class="f" d="M290 878 V1022" marker-end="url(#arw)"/>
+  <path class="f" d="M810 878 V1022" marker-end="url(#arw)"/>
+
+  <path d="M400 1118 H700" stroke="#A7B0BA" stroke-width="1.5" fill="none" stroke-dasharray="6 4" marker-end="url(#arwG)" marker-start="url(#arwG)"/>
+
+  <!-- ===== 서비스 ===== -->
+
+  <!-- VPC 인터페이스 엔드포인트 — ENI이므로 프라이빗 서브넷에 AZ별 배치 -->
+  <use href="#i-vpce" x="100" y="692" width="36" height="36" style="color:#8C4FFF"/>
+  <text class="t svc" x="118" y="742" text-anchor="middle">VPC 엔드포인트</text>
+  <text class="t cap" x="118" y="755" text-anchor="middle">SSM 인터페이스 · ENI</text>
+
+  <use href="#i-vpce" x="954" y="692" width="36" height="36" style="color:#8C4FFF"/>
+  <text class="t svc" x="972" y="742" text-anchor="middle">VPC 엔드포인트</text>
+  <text class="t cap" x="972" y="755" text-anchor="middle">SSM 인터페이스 · ENI</text>
+
+  <!-- 외부 ALB (2개 퍼블릭 서브넷에 걸침) -->
+  <use href="#i-alb" x="530" y="400" width="40" height="40" style="color:#8C4FFF"/>
+  <text class="t svc hp" x="550" y="454" text-anchor="middle">Application Load Balancer</text>
+  <text class="t cap hp" x="550" y="468" text-anchor="middle">인터넷 경계 · HTTP 80 · 2개 AZ 매핑</text>
+
+  <!-- WEB 티어 EC2 -->
+  <use href="#i-ec2" x="280" y="558" width="40" height="40" style="color:#ED7100"/>
+  <text class="t svc" x="300" y="612" text-anchor="middle">Amazon EC2</text>
+  <text class="t cap" x="300" y="626" text-anchor="middle">nginx 리버스 프록시</text>
+
+  <use href="#i-ec2" x="780" y="558" width="40" height="40" style="color:#ED7100"/>
+  <text class="t svc" x="800" y="612" text-anchor="middle">Amazon EC2</text>
+  <text class="t cap" x="800" y="626" text-anchor="middle">nginx 리버스 프록시</text>
+
+  <!-- 내부 ALB -->
+  <use href="#i-alb" x="530" y="688" width="40" height="40" style="color:#8C4FFF"/>
+  <text class="t svc hv" x="550" y="742" text-anchor="middle">Application Load Balancer</text>
+  <text class="t cap hv" x="550" y="756" text-anchor="middle">내부 전용 · APP 헬스체크</text>
+
+  <!-- APP 티어 EC2 -->
+  <use href="#i-ec2" x="280" y="798" width="40" height="40" style="color:#ED7100"/>
+  <text class="t svc" x="300" y="852" text-anchor="middle">Amazon EC2</text>
+  <text class="t cap" x="300" y="866" text-anchor="middle">포털 애플리케이션</text>
+
+  <use href="#i-ec2" x="780" y="798" width="40" height="40" style="color:#ED7100"/>
+  <text class="t svc" x="800" y="852" text-anchor="middle">Amazon EC2</text>
+  <text class="t cap" x="800" y="866" text-anchor="middle">포털 애플리케이션</text>
+
+  <!-- ElastiCache -->
+  <use href="#i-cache" x="530" y="1026" width="40" height="40" style="color:#C925D1"/>
+  <text class="t svc hv" x="550" y="1080" text-anchor="middle">Amazon ElastiCache</text>
+  <text class="t cap hv" x="550" y="1094" text-anchor="middle">세션 스토어 · Serverless · 다중 AZ 복제</text>
+
+  <!-- RDS 기본 -->
+  <use href="#i-rds" x="280" y="1026" width="40" height="40" style="color:#C925D1"/>
+  <text class="t svc" x="300" y="1080" text-anchor="middle">Amazon RDS</text>
+  <text class="t cap" x="300" y="1094" text-anchor="middle">MySQL · 기본</text>
+
+  <!-- RDS 대기 (설계) -->
+  <use href="#i-rds" x="780" y="1026" width="40" height="40" style="color:#C925D1"/>
+  <text class="t svc" x="800" y="1080" text-anchor="middle">Amazon RDS</text>
+  <text class="t cap" x="800" y="1094" text-anchor="middle">Multi-AZ 대기 인스턴스 · 동기 복제</text>
+
+
+  <!-- ===== 주석 ===== -->
+  <rect x="20" y="1228" width="1060" height="150" rx="7" fill="#FAFBFC" stroke="#DDE3E9" stroke-width="1.2"/>
+
+  <text class="t legb" x="36" y="1248">보안 그룹 체인 · 모든 인바운드를 CIDR이 아닌 보안 그룹 참조로 허용</text>
+  <text class="t leg" x="36" y="1266">0.0.0.0/0 →(80) asbg-alb-sg →(80) asbg-web-sg →(80) asbg-intalb-sg →(3000) asbg-app-sg →(6379) asbg-redis-sg</text>
+  <text class="t leg" x="36" y="1282">asbg-app-sg →(3306) asbg-rds-sg · SSH 인바운드 없음(SSM Session Manager 사용) · DB 서브넷에는 인터넷 방향 라우팅 없음</text>
+
+  <rect x="36" y="1300" width="24" height="12" rx="3" fill="none" stroke="#ED7100" stroke-width="1.8" stroke-dasharray="6 3"/>
+  <text class="t leg" x="66" y="1310">Auto Scaling 그룹 (2개 AZ에 걸침)</text>
+  <text class="t leg" x="640" y="1310">S3 게이트웨이 엔드포인트는 라우팅 테이블 항목이라 아이콘 없음</text>
+
+  <text class="t legb" x="36" y="1332">주요 용량과 정책</text>
+  <text class="t leg" x="36" y="1348">인스턴스 c7g.large(Graviton) · APP 용량 4/10/16 · WEB 용량 2/4/8 · 웜 풀 3대 · 예약 조정 + 대상 추적 2종</text>
+  <text class="t leg" x="36" y="1364">RDS Multi-AZ · 세션 스토어 ElastiCache Serverless · HTTPS(ACM + 443 리다이렉트) · RDS·캐시 전송 중 암호화</text>
+</svg>
