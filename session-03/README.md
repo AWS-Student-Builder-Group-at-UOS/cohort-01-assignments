@@ -8,8 +8,7 @@
 |---|---|
 | 마감 | 2026-11-17 21:00 KST |
 | 참여 | 자율 참여, 1인 1PR |
-| 명령 | 기본 트랙: 아래 단계별 가이드 링크와 "준비물과 명령" 참고 (Windows는 그 절의 대응 표) / 에이전트 트랙: `agent-skeleton`의 `README.md` |
-| 화면과 함께 보는 단계별 가이드 | [MAC&LINUX](https://app.notion.com/p/HANDS_ON_GUIDE_MAC-LINUX-055840c66bba820993b181609ba4f2a9?source=copy_link), [WINDOWS](https://app.notion.com/p/HANDS_ON_GUIDE_WINDOWS-e69840c66bba8379a48e81170d072a6d?source=copy_link)|
+| 화면과 함께 보는 단계별 가이드 | [MAC&LINUX](https://app.notion.com/p/HANDS_ON_GUIDE_MAC-LINUX-055840c66bba820993b181609ba4f2a9?source=copy_link), [WINDOWS](https://app.notion.com/p/HANDS_ON_GUIDE_WINDOWS-e69840c66bba8379a48e81170d072a6d?source=copy_link), [에이전트 트랙](https://app.notion.com/p/Session-03-409840c66bba80b5b464e64ada588655?source=copy_link)|
 
 ### 진행 순서
 
