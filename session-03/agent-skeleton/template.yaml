@@ -1,0 +1,236 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Slack 슬래시 명령 -> 입구 Lambda -> SQS -> 워커 Lambda(Bedrock 에이전트) 뼈대 (부원용)
+
+Parameters:
+  BaseModelId:
+    Type: String
+    Description: >-
+      'global.' 접두사를 뺀 모델 ID. 예) anthropic.claude-...
+      list-inference-profiles 결과의 global. 프로파일 ID에서 접두사만 떼어 넣는다.
+  SlackSigningSecret:
+    Type: String
+    NoEcho: true
+    Description: Slack 앱의 Signing Secret (Basic Information 화면)
+  AllowedSlackUserIds:
+    Type: String
+    Description: 명령을 쓸 수 있는 Slack 사용자 ID. 쉼표로 구분. 비어 있으면 아무도 쓰지 못한다.
+  PriceInputPerM:
+    Type: String
+    Default: ""
+    Description: 모델 입력 단가(USD/100만 토큰). 비우면 코드의 기본값(Sonnet 5 Global)을 쓴다. 다른 모델이면 반드시 맞춰야 지출 상한이 정확하다 (Sonnet 4.6 Global은 3)
+  PriceOutputPerM:
+    Type: String
+    Default: ""
+    Description: 모델 출력 단가(USD/100만 토큰). Sonnet 4.6 Global은 15
+  PriceCacheReadPerM:
+    Type: String
+    Default: ""
+    Description: 캐시 읽기 단가(USD/100만 토큰). Sonnet 4.6 Global은 0.30
+  PriceCacheWritePerM:
+    Type: String
+    Default: ""
+    Description: 캐시 쓰기 단가(5분, USD/100만 토큰). Sonnet 4.6 Global은 3.75
+  MaxTotalTokens:
+    Type: Number
+    Default: 50000
+    Description: 한 번의 실행에서 쓸 수 있는 누적 토큰 상한 (캐시 읽기·쓰기 포함).
+  MaxUsdPerRun:
+    Type: Number
+    Default: 0.5
+    Description: 한 번의 실행에 쓸 최대 금액(USD). 넘기 전에 에이전트가 스스로 멈춘다. 이 값은 요금표가 아니라 뼈대의 가정이므로 첫 실행의 비용으로 보정한다
+  DailyCapUsd:
+    Type: Number
+    Default: 2
+    Description: 하루(KST 기준) 최대 금액(USD). 이 금액을 예약할 수 없으면 모델을 호출하지 않는다
+  MonthlyCapUsd:
+    Type: Number
+    Default: 10
+    Description: 한 달 최대 금액(USD)
+  BudgetAlertEmail:
+    Type: String
+    Default: ""
+    Description: 비워 두면 AWS Budgets 알림을 만들지 않는다. 계정 전체 월 비용 알림을 받을 이메일
+  MonthlyBudgetUsd:
+    Type: Number
+    Default: 10
+    Description: AWS Budgets 월 예산(USD). 계정 전체 비용 기준이며 알림만 보낸다 (자동 차단 아님)
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+
+Conditions:
+  HasPriceInput: !Not [!Equals [!Ref PriceInputPerM, ""]]
+  HasPriceOutput: !Not [!Equals [!Ref PriceOutputPerM, ""]]
+  HasPriceCacheRead: !Not [!Equals [!Ref PriceCacheReadPerM, ""]]
+  HasPriceCacheWrite: !Not [!Equals [!Ref PriceCacheWritePerM, ""]]
+  HasBudgetEmail: !Not [!Equals [!Ref BudgetAlertEmail, ""]]
+
+Globals:
+  Function:
+    Runtime: python3.13
+    CodeUri: src/
+    MemorySize: 256
+
+Resources:
+  # ---------------------------------------------------------------- 큐
+  AgentDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600 # 14일
+
+  AgentQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      # Lambda 문서: 가시성 제한 시간은 워커 함수 제한 시간(300초)의 6배 이상
+      VisibilityTimeout: 1800
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt AgentDeadLetterQueue.Arn
+        maxReceiveCount: 5 # Lambda 문서 권장: 5 이상
+
+  # ---------------------------------------------------------------- 지출 상한 표 (일·월 누적 금액)
+  SpendTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+
+  # ---------------------------------------------------------------- 월 예산 알림 (계정 전체 비용 기준, 알림만 보낸다)
+  AlertBudget:
+    Type: AWS::Budgets::Budget
+    Condition: HasBudgetEmail
+    Properties:
+      Budget:
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref MonthlyBudgetUsd
+          Unit: USD
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 50
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref BudgetAlertEmail
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref BudgetAlertEmail
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref BudgetAlertEmail
+
+  # ---------------------------------------------------------------- 로그 그룹 (보존 기간을 정해 비용을 막는다)
+  AckLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !Ref LogRetentionDays
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !Ref LogRetentionDays
+
+  # ---------------------------------------------------------------- 입구 Lambda
+  AckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ack_handler.lambda_handler
+      Timeout: 5 # Slack은 3초 안에 응답을 받아야 한다
+      MemorySize: 512 # 메모리에 비례해 CPU가 늘어 콜드 스타트가 빨라진다 (256MB에서 첫 요청이 2.7초 걸렸다)
+      Environment:
+        Variables:
+          SLACK_SIGNING_SECRET: !Ref SlackSigningSecret
+          ALLOWED_SLACK_USER_IDS: !Ref AllowedSlackUserIds
+          QUEUE_URL: !Ref AgentQueue
+      LoggingConfig:
+        LogGroup: !Ref AckLogGroup
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: sqs:SendMessage
+              Resource: !GetAtt AgentQueue.Arn
+      # 인증은 코드 안의 Slack 서명 검증이 맡는다 (AuthType NONE이면 URL을 아는 누구나 호출할 수 있다)
+      FunctionUrlConfig:
+        AuthType: NONE
+
+  # ---------------------------------------------------------------- 워커 Lambda
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Timeout: 300
+      MemorySize: 1024
+      Environment:
+        Variables:
+          MODEL_ID: !Sub "global.${BaseModelId}"
+          MAX_TOTAL_TOKENS: !Ref MaxTotalTokens
+          MAX_USD_PER_RUN: !Ref MaxUsdPerRun
+          DAILY_CAP_USD: !Ref DailyCapUsd
+          MONTHLY_CAP_USD: !Ref MonthlyCapUsd
+          CAP_TABLE: !Ref SpendTable
+          CACHE_ENABLED: "true"
+          BEDROCK_READ_TIMEOUT: "60" # 모델 한 번 호출의 읽기 제한(초)
+          DEADLINE_MARGIN_S: "70" # 남은 시간이 이보다 적으면 새 모델 호출을 시작하지 않는다 (읽기 제한보다 길어야 한다)
+          PRICE_INPUT_PER_M: !If [HasPriceInput, !Ref PriceInputPerM, !Ref "AWS::NoValue"]
+          PRICE_OUTPUT_PER_M: !If [HasPriceOutput, !Ref PriceOutputPerM, !Ref "AWS::NoValue"]
+          PRICE_CACHE_READ_PER_M: !If [HasPriceCacheRead, !Ref PriceCacheReadPerM, !Ref "AWS::NoValue"]
+          PRICE_CACHE_WRITE_PER_M: !If [HasPriceCacheWrite, !Ref PriceCacheWritePerM, !Ref "AWS::NoValue"]
+      LoggingConfig:
+        LogGroup: !Ref WorkerLogGroup
+      Policies:
+        # 지출 상한 표에 금액을 기록하는 권한 (이 표의 UpdateItem만 허용)
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:UpdateItem
+              Resource: !GetAtt SpendTable.Arn
+        # Global 추론 프로파일 호출에 필요한 권한 (Bedrock 문서의 inference-profiles-prereq 예시 구조)
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: bedrock:InvokeModel*
+              Resource:
+                - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${BaseModelId}"
+            - Effect: Allow
+              Action: bedrock:InvokeModel*
+              Resource:
+                - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BaseModelId}"
+                - !Sub "arn:aws:bedrock:::foundation-model/${BaseModelId}"
+              Condition:
+                StringLike:
+                  "bedrock:InferenceProfileArn": !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${BaseModelId}"
+      Events:
+        FromQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt AgentQueue.Arn
+            BatchSize: 1
+            ScalingConfig:
+              MaximumConcurrency: 2 # 동시에 도는 워커 수 상한 (Bedrock 비용·호출 제한 보호)
+
+Outputs:
+  SlackRequestUrl:
+    Description: Slack 슬래시 명령의 Request URL에 넣을 값
+    Value: !GetAtt AckFunctionUrl.FunctionUrl
+  DeadLetterQueueUrl:
+    Description: 실패한 메시지가 쌓이는 큐
+    Value: !Ref AgentDeadLetterQueue

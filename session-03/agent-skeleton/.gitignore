@@ -1,0 +1,14 @@
+# 배포 산출물과 설정 (비밀값이 들어갈 수 있다)
+.aws-sam/
+samconfig.toml
+samconfig.yaml
+.env
+.env.*
+.venv/
+
+# 파이썬 캐시
+__pycache__/
+*.pyc
+.pytest_cache/
+
+.DS_Store

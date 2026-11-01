@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>행사 신청 · ASBG</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="ASBG 행사 신청 처음으로"><span class="brand-mark" aria-hidden="true">a</span> ASBG<span class="brand-divider">/</span><span class="brand-lab">PLAYGROUND</span></a>
+      <span class="session-label">SESSION <b>03</b></span>
+    </header>
+    <main>
+      <div class="page-heading">
+        <div><p class="eyebrow">SERVERLESS LAB</p><h1>행사 신청</h1></div>
+        <div class="mode-switch" role="group" aria-label="배포한 실습 선택">
+          <button id="step1" class="mode-button active" aria-pressed="true" type="button">실습 1 <span>· 동기</span></button>
+          <button id="step2" class="mode-button" aria-pressed="false" type="button">실습 2 <span>· 비동기</span></button>
+        </div>
+      </div>
+      <details class="connection" id="connection" open>
+        <summary><span class="connection-title"><span class="connection-dot" id="connectionDot"></span> API 주소 <span id="connectionStatus">주소를 입력하세요</span></span><span class="connection-edit">설정 <span aria-hidden="true">⌄</span></span></summary>
+        <form id="apiForm" class="api-form">
+          <label class="sr-only" for="api">배포한 API 주소</label>
+          <input id="api" type="url" placeholder="https://…execute-api.ap-northeast-2.amazonaws.com" autocomplete="off" spellcheck="false" required aria-describedby="apiError">
+          <button class="button secondary" type="submit">적용</button>
+          <p id="apiError" class="field-error" role="alert" hidden></p>
+        </form>
+      </details>
+      <div class="workspace">
+        <section class="panel form-panel" aria-labelledby="formTitle">
+          <div class="panel-heading"><h2 id="formTitle">신청 정보</h2><span class="section-index">01</span></div>
+          <div class="presets" id="presets" role="group" aria-label="실험 입력 선택" hidden>
+            <button type="button" id="normalPreset" class="preset selected" aria-pressed="true">정상 신청</button>
+            <button type="button" id="failurePreset" class="preset" aria-pressed="false">오류 실험 <span aria-hidden="true">↗</span></button>
+          </div>
+          <form id="registrationForm">
+            <div class="field">
+              <div class="label-row"><label for="rid">신청 번호</label><button id="newId" class="text-button" type="button"><span aria-hidden="true">↻</span> 새 번호</button></div>
+              <input id="rid" class="mono" required pattern="[A-Za-z0-9_\-]{1,64}" maxlength="64" autocomplete="off" spellcheck="false" title="영문, 숫자, -, _를 사용해 1~64자로 입력하세요.">
+            </div>
+            <div class="field"><label for="name">이름</label><input id="name" value="홍길동" required maxlength="50" autocomplete="off"></div>
+            <div class="field"><label for="email">이메일</label><input id="email" value="gildong@example.com" type="email" required maxlength="100" autocomplete="off"></div>
+            <div class="field"><label for="org">소속 <span class="optional">선택</span></label><input id="org" value="ASBG" maxlength="50" placeholder="소속 없음" autocomplete="off"></div>
+            <button class="button primary" id="submit" type="submit"><span id="submitLabel">신청하기</span><span aria-hidden="true">↗</span></button>
+          </form>
+        </section>
+        <section class="panel result-panel" aria-labelledby="resultTitle">
+          <div class="panel-heading"><h2 id="resultTitle">처리 결과</h2><span class="status-pill" id="statusPill" data-state="idle" role="status">대기 중</span></div>
+          <div class="metrics">
+            <div><span class="metric-label">응답 시간</span><strong id="latency">—</strong></div>
+            <div><span class="metric-label">HTTP 응답</span><strong id="httpStatus">—</strong></div>
+            <div><span class="metric-label">발급 횟수</span><strong id="issueCount">—</strong></div>
+          </div>
+          <div class="badge-preview" id="badgePreview" data-state="idle">
+            <div class="ticket-top"><span>ASBG <span class="ticket-slash">/</span> SESSION 03</span><span class="ticket-type">참가증</span></div>
+            <div class="ticket-content">
+              <div class="ticket-symbol" aria-hidden="true"><span></span><span></span><span></span></div>
+              <p class="ticket-name" id="badgeName">아직 신청 전이에요</p>
+              <p class="ticket-org" id="badgeOrg">신청 후 이곳에서 확인하세요.</p>
+            </div>
+            <div class="ticket-bottom"><span id="badgeCode">AWAITING REGISTRATION</span><span class="ticket-bars" aria-hidden="true"></span></div>
+          </div>
+          <div class="result-caption"><span class="mono" id="resultId">신청 번호 —</span><span id="pollStatus" role="status"></span></div>
+          <p id="notice" class="notice" role="status" hidden></p>
+          <div class="result-actions">
+            <button class="button secondary" id="refresh" type="button"><span aria-hidden="true">↻</span> 상태 조회</button>
+            <button class="button secondary" id="resend" type="button" hidden>작업 재전송 <span aria-hidden="true">↗</span></button>
+          </div>
+          <details class="details" id="details">
+            <summary>상세 보기 <span aria-hidden="true">+</span></summary>
+            <div class="detail-body">
+              <h3>요청 응답</h3><pre id="responseJson">아직 요청이 없습니다.</pre>
+              <h3>DB 조회 결과</h3><pre id="statusJson">아직 조회하지 않았습니다.</pre>
+              <h3>진행 기록</h3><ol id="timeline" class="timeline"></ol>
+            </div>
+          </details>
+        </section>
+      </div>
+      <footer><span>ASBG UOS <span class="footer-dot">·</span> 행사 신청과 참가증 발급</span><span id="modeNote">현재 배포한 실습을 선택하세요.</span></footer>
+    </main>
+  </div>
+</body>
+</html>

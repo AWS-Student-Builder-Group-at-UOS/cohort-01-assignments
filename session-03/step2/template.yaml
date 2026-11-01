@@ -1,0 +1,253 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 행사 신청과 참가증 발급 - 실습 2 (EventBridge + SQS 비동기 처리)
+
+# 실습 1의 template.yaml과 비교해 보세요:  diff step1/template.yaml step2/template.yaml
+# 같은 스택 이름으로 배포하면 DB와 API는 유지하고, 기존 함수를 갱신하며 이벤트·큐·발급 함수를 추가합니다.
+
+Parameters:
+  IssueDelaySeconds:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    MaxValue: 8
+    Description: 참가증 발급이 오래 걸리는 상황을 흉내 내는 지연 시간(초)
+  Idempotent:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: 발급 중복 방지(조건부 쓰기) 사용 여부. false로 바꾸면 중복 발급 실험을 할 수 있다.
+  MaxReceiveCount:
+    Type: Number
+    Default: 3
+    MinValue: 1
+    MaxValue: 10
+    Description: DLQ로 옮기기 전 최대 수신 횟수. 수업에서는 3회, AWS는 Lambda 처리 시 5회 이상을 권장한다.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    CodeUri: src/
+    MemorySize: 128
+    Timeout: 10 # 실행 시간 제한(초)
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref RegistrationsTable
+        ISSUE_DELAY_SECONDS: !Ref IssueDelaySeconds
+        EVENT_BUS_NAME: !Ref RegistrationEventBus
+
+Resources:
+  # ---------- 실습 1과 같은 부분 ----------
+  RegistrationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: registrationId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: registrationId
+          KeyType: HASH
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: ['*']
+        AllowHeaders: ['Content-Type']
+        AllowMethods: ['GET', 'POST', 'OPTIONS']
+
+  # 보존 기간을 제한하고 스택 삭제 시 로그도 정리한다.
+  RegisterLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/asbg/${AWS::StackName}/register'
+      RetentionInDays: 7
+
+  StatusLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/asbg/${AWS::StackName}/status'
+      RetentionInDays: 7
+
+  ResendLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/asbg/${AWS::StackName}/resend'
+      RetentionInDays: 7
+
+  IssueLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/asbg/${AWS::StackName}/issue'
+      RetentionInDays: 7
+
+  StatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: status.handler
+      LoggingConfig:
+        LogGroup: !Ref StatusLogGroup
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt RegistrationsTable.Arn
+      Events:
+        Get:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /registrations/{registrationId}
+            Method: GET
+
+  # ---------- 바뀐 부분: 접수 함수는 이제 DB 저장 + 이벤트 발행만 한다 ----------
+  RegisterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: register.handler
+      LoggingConfig:
+        LogGroup: !Ref RegisterLogGroup
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: ['dynamodb:PutItem', 'dynamodb:GetItem']
+              Resource: !GetAtt RegistrationsTable.Arn
+        - EventBridgePutEventsPolicy: # 이벤트 버스에 이벤트를 보낼 권한이 새로 필요하다.
+            EventBusName: !Ref RegistrationEventBus
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /registrations
+            Method: POST
+
+  # ---------- 새로 추가된 부분 ----------
+  # (실습용) 같은 작업을 한 번 더 보내는 함수
+  ResendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: resend.handler
+      LoggingConfig:
+        LogGroup: !Ref ResendLogGroup
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt RegistrationsTable.Arn
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref RegistrationEventBus
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /registrations/{registrationId}/resend
+            Method: POST
+
+  # 이벤트가 오가는 길
+  RegistrationEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub '${AWS::StackName}-bus'
+
+  # 규칙: "신청 접수됨" 이벤트를 발급 큐로 보낸다.
+  RegistrationRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName: !Ref RegistrationEventBus
+      EventPattern:
+        source: ['event-signup.registration']
+        detail-type: ['RegistrationReceived']
+      Targets:
+        - Id: issue-queue
+          Arn: !GetAtt IssueQueue.Arn
+
+  # 대기열: 발급할 일을 줄 세워 보관한다.
+  IssueQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      # 가시성 제한 시간: 함수가 메시지를 가져가 처리하는 동안 다른 처리자에게 숨기는 시간.
+      # AWS 권장: 함수 시간 제한의 최소 6배. 여기서는 10초 × 6, 배치 대기 시간은 0초.
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt IssueDeadLetterQueue.Arn
+        maxReceiveCount: !Ref MaxReceiveCount # 첫 수신을 포함한 횟수이며, 정확한 재시도 주기를 보장하지는 않는다.
+
+  # DLQ: 반복해서 실패한 메시지를 따로 보관한다.
+  IssueDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600 # 14일
+
+  # 이벤트 규칙이 이 큐에 메시지를 넣을 수 있도록 허용
+  IssueQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref IssueQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt IssueQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !GetAtt RegistrationRule.Arn
+
+  # 참가증 발급 함수: 큐에 메시지가 들어오면 실행된다.
+  IssueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: issue.handler
+      LoggingConfig:
+        LogGroup: !Ref IssueLogGroup
+      Environment:
+        Variables:
+          IDEMPOTENT: !Ref Idempotent
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: ['dynamodb:UpdateItem', 'dynamodb:GetItem']
+              Resource: !GetAtt RegistrationsTable.Arn
+      Events:
+        FromQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt IssueQueue.Arn
+            BatchSize: 1 # 한 번에 메시지 1개씩 처리 (실패 관찰이 쉽다)
+
+Outputs:
+  ApiUrl:
+    Description: API URL to enter in the signup page
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
+  TableName:
+    Value: !Ref RegistrationsTable
+  IssueFunctionName:
+    Value: !Ref IssueFunction
+  RegisterFunctionLogGroup:
+    Value: !Ref RegisterLogGroup
+  StatusFunctionLogGroup:
+    Value: !Ref StatusLogGroup
+  ResendFunctionLogGroup:
+    Value: !Ref ResendLogGroup
+  IssueFunctionLogGroup:
+    Value: !Ref IssueLogGroup
+  EventBusName:
+    Value: !Ref RegistrationEventBus
+  QueueName:
+    Value: !GetAtt IssueQueue.QueueName
+  QueueUrl:
+    Value: !Ref IssueQueue
+  QueueArn:
+    Value: !GetAtt IssueQueue.Arn
+  DeadLetterQueueName:
+    Value: !GetAtt IssueDeadLetterQueue.QueueName
+  DeadLetterQueueUrl:
+    Value: !Ref IssueDeadLetterQueue
+  DeadLetterQueueArn:
+    Value: !GetAtt IssueDeadLetterQueue.Arn

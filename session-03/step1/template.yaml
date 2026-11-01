@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 행사 신청과 참가증 발급 - 실습 1 (동기 처리)
+
+Parameters:
+  IssueDelaySeconds:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    MaxValue: 25
+    Description: 참가증 발급이 오래 걸리는 상황을 흉내 내는 지연 시간(초)
+
+# 모든 함수에 공통으로 적용되는 설정
+Globals:
+  Function:
+    Runtime: python3.12
+    CodeUri: src/
+    MemorySize: 128
+    Timeout: 10 # 실행 시간 제한(초). 이 시간을 넘기면 Lambda가 실행을 강제로 끝낸다.
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref RegistrationsTable
+        ISSUE_DELAY_SECONDS: !Ref IssueDelaySeconds
+
+Resources:
+  # DB: 신청과 참가증 정보. 신청 번호(registrationId)가 파티션 키.
+  RegistrationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST # 온디맨드: 쓴 만큼만 과금
+      AttributeDefinitions:
+        - AttributeName: registrationId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: registrationId
+          KeyType: HASH
+
+  # 요청이 들어오는 입구 (HTTP API)
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration: # 브라우저(로컬 서버로 연 신청 화면)에서 호출할 수 있게 허용
+        AllowOrigins: ['*']
+        AllowHeaders: ['Content-Type']
+        AllowMethods: ['GET', 'POST', 'OPTIONS']
+
+  # 로그도 스택의 리소스로 관리한다. make delete에서 함께 지워진다.
+  RegisterLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/asbg/${AWS::StackName}/register'
+      RetentionInDays: 7
+
+  StatusLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/asbg/${AWS::StackName}/status'
+      RetentionInDays: 7
+
+  RegisterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: register.handler
+      LoggingConfig:
+        LogGroup: !Ref RegisterLogGroup
+      Policies: # 실행 역할: 코드가 쓰는 작업만, 이 테이블에만 허용한다.
+        - Statement:
+            - Effect: Allow
+              Action: ['dynamodb:PutItem', 'dynamodb:UpdateItem']
+              Resource: !GetAtt RegistrationsTable.Arn
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /registrations
+            Method: POST
+
+  StatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: status.handler
+      LoggingConfig:
+        LogGroup: !Ref StatusLogGroup
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt RegistrationsTable.Arn
+      Events:
+        Get:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /registrations/{registrationId}
+            Method: GET
+
+Outputs:
+  ApiUrl:
+    Description: API URL to enter in the signup page
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
+  TableName:
+    Value: !Ref RegistrationsTable
+  RegisterFunctionLogGroup:
+    Value: !Ref RegisterLogGroup
+  StatusFunctionLogGroup:
+    Value: !Ref StatusLogGroup
